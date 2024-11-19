@@ -1,0 +1,51 @@
+﻿# .env file containing sensitive environment variables
+.env
+
+
+# .NET / C# related
+bin/
+obj/
+out/
+*.dll
+*.exe
+*.pdb
+*.cache
+*.log
+
+# User-specific files
+.vscode/
+.idea/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+
+# Build and dependency files
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# JetBrains Rider files
+.idea/
+
+# Windows Installer Files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# NuGet packages
+*.nupkg
+# If you have a directory for NuGet packages, you may want to ignore it:
+# .nuget/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# ASP.NET Core environment configuration files (if you're using something like Docker or Kubernetes)
+docker-compose.override.yml
+
+# Dependency directories
+node_modules/
+bower_components/
+jspm_packages/
