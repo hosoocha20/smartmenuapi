@@ -70,6 +70,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
         };
     });
+builder.Services.AddAuthorization(); // Add authorization services
 
 // Add Identity services
 builder.Services.AddIdentity<User, IdentityRole>()
