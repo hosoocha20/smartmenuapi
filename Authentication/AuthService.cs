@@ -69,10 +69,20 @@ namespace SmartMenuManagerApp.Authentication
             _context.Restaurants.Add(restaurant);
             await _context.SaveChangesAsync();  // Save user and restaurant to the database
 
+            // Create default menu for the restaurant
+            var menu = new Menu
+            {
+                Name = registerDto.RestaurantName + " Menu",
+                RestaurantId = restaurant.Id
+            };
+
+            _context.Menus.Add(menu);
+            await _context.SaveChangesAsync();
+
             // Generate JWT Token for the user
             var jwtToken = _jwtService.GenerateJwtToken(user);
 
-            return new ApiResponse(true, "User and restaurant created successfully", jwtToken);
+            return new ApiResponse(true, "User and restaurant and default menu created successfully", jwtToken);
         }
 
         // LoginAsync - Handles User Login

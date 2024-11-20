@@ -39,8 +39,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 
 
-// If AuthService depends on other services like UserManager or JwtSettings, add those services first.
-builder.Services.AddScoped<UserManager<User>>();  // If not already registered
+
+builder.Services.AddScoped<UserManager<User>>();  
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings")); // JWT Settings
 
 // Add DbContext and configure SQL Server with the connection string
@@ -49,7 +49,7 @@ builder.Services.AddDbContext<DataContext>(options =>
     sqlOptions => sqlOptions.EnableRetryOnFailure(
         maxRetryCount: 5,        // Retry up to 5 times
         maxRetryDelay: TimeSpan.FromSeconds(30), // Max delay of 30 seconds between retries
-        errorNumbersToAdd: null) // You can add specific SQL error codes to retry on    
+        errorNumbersToAdd: null) 
     ));
 
 
