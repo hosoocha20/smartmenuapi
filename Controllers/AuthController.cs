@@ -45,6 +45,8 @@ namespace SmartMenuManagerApp.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
+
+
             try
             {
                 // Call AuthService to log in and get the JWT token

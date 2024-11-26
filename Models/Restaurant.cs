@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Text.Json.Serialization;
 
 namespace SmartMenuManagerApp.Models
 {
@@ -15,11 +16,13 @@ namespace SmartMenuManagerApp.Models
 
         // Foreign Key - linked to the user who owns this restaurant
         public string UserId { get; set; }
-        public User User { get; set; } // Navigation property to ApplicationUser
+        public virtual User User { get; set; } // Navigation property to ApplicationUser
 
         // Navigation properties
-        public ICollection<MyTable> MyTables { get; set; } = new List<MyTable>(); // Tables in the restaurant
-        public Menu Menu { get; set; } 
-        public Theme Theme { get; set; } // Customizable theme for the restaurant's menu
+        public virtual ICollection<MyTable> MyTables { get; set; } = new List<MyTable>(); // Tables in the restaurant
+        
+        
+        public virtual Menu Menu { get; set; } 
+        public virtual Theme Theme { get; set; } // Customizable theme for the restaurant's menu
     }
 }

@@ -7,10 +7,10 @@
 
         // Foreign Key - each category belongs to a menu
         public int MenuId { get; set; }
-        public Menu Menu { get; set; } // Navigation property to Menu
+        public virtual Menu Menu { get; set; } // Navigation property to Menu
 
         // Navigation properties
-        public ICollection<MenuSubCategory> MenuSubCategories { get; set; } = new List<MenuSubCategory>(); // Subcategories
-        public ICollection<Product> Products { get; set; } = new List<Product>(); // Products in this category
+        public virtual ICollection<MenuSubCategory> MenuSubCategories { get; set; } = new List<MenuSubCategory>(); // Subcategories
+        public virtual ICollection<Product> Products { get; set; } = new List<Product>(); 
     }
 }

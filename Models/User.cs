@@ -11,12 +11,12 @@ namespace SmartMenuManagerApp.Models
         // PasswordHash - hashed password (handled by Identity)
         // SecurityStamp - used to verify account security
 
-        // Additional properties specific to your application
+        // Additional properties 
         public string FullName { get; set; }
         public string RestaurantName { get; set; }
         public DateTime DateRegistered { get; set; } = DateTime.UtcNow; // Date the user registered
                                                                         // Navigation property - one user can own multiple restaurants
-        public Restaurant Restaurant { get; set; }
+        public virtual Restaurant Restaurant { get; set; }
 
     }
 }

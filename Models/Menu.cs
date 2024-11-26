@@ -1,4 +1,6 @@
-﻿namespace SmartMenuManagerApp.Models
+﻿using System.Text.Json.Serialization;
+
+namespace SmartMenuManagerApp.Models
 {
     public class Menu
     {
@@ -7,9 +9,11 @@
 
         // Foreign Key - each menu belongs to a restaurant
         public int RestaurantId { get; set; }
-        public Restaurant Restaurant { get; set; } // Navigation property to Restaurant
+
+        
+        public virtual Restaurant Restaurant { get; set; } // Navigation property to Restaurant
 
         // Navigation property
-        public ICollection<MenuCategory> MenuCategories { get; set; } = new List<MenuCategory>(); // Categories in the menu
+        public virtual ICollection<MenuCategory> MenuCategories { get; set; } = new List<MenuCategory>(); // Categories in the menu
     }
 }

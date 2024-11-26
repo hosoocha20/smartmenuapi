@@ -4,7 +4,7 @@ namespace SmartMenuManagerApp.Interfaces
 {
     public interface IMenuCategoryRepository
     {
-        Task<MenuCategory> GetByIdAsync(int id);
+        Task<Menu> GetMenuByRestaurantIdAsync(int restaurantId);
         Task AddAsync(MenuCategory menuCategory);
         Task SaveChangesAsync();
     }

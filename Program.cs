@@ -3,11 +3,14 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using SmartMenuManagerApp.Authentication;
 using SmartMenuManagerApp.Configurations;
 using SmartMenuManagerApp.Data;
+using SmartMenuManagerApp.Interfaces;
 using SmartMenuManagerApp.Models;
-
+using SmartMenuManagerApp.Repository;
+using SmartMenuManagerApp.Services;
 using System;
 using System.Text;
 
@@ -29,14 +32,47 @@ builder.Configuration
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+        .AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme.",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey
+        //Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
 
 // Add other services like your custom services, repositories, etc.
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<MenuCategoryService>();
+builder.Services.AddScoped<IMenuCategoryRepository, MenuCategoryRepository>();
+builder.Services.AddScoped<IRestaurantRepository, RestaurantRepository>();
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 
 
@@ -69,8 +105,33 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = jwtSettings.Audience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
         };
+        Console.WriteLine(jwtSettings.Issuer);
+
+        // Add event handlers for debugging
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine($"Authentication failed: {context.Exception.Message}");
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = context =>
+            {
+                Console.WriteLine("Token validated successfully");
+                return Task.CompletedTask;
+            }
+        };
     });
-builder.Services.AddAuthorization(); // Add authorization services
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Jwt_Or_Identity", policy =>
+    {
+        policy.AuthenticationSchemes.Add(IdentityConstants.ApplicationScheme);
+        policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
+        policy.RequireAuthenticatedUser();
+
+    });
+});
 
 // Add Identity services
 builder.Services.AddIdentity<User, IdentityRole>()
@@ -81,7 +142,13 @@ builder.Services.AddIdentity<User, IdentityRole>()
 
 var app = builder.Build();
 
-
+// Middleware to log request details
+app.Use(async (context, next) =>
+{
+    Console.WriteLine($"Request Path: {context.Request.Path}");
+    Console.WriteLine($"Authorization Header: {context.Request.Headers["Authorization"]}");
+    await next();
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -91,8 +158,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
+app.UseDeveloperExceptionPage(); // This will show detailed errors in development mode
 
 app.MapControllers();
 

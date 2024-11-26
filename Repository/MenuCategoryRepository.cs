@@ -1,4 +1,5 @@
-﻿using SmartMenuManagerApp.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using SmartMenuManagerApp.Data;
 using SmartMenuManagerApp.Interfaces;
 using SmartMenuManagerApp.Models;
 using System;
@@ -18,9 +19,11 @@ namespace SmartMenuManagerApp.Repository
             await _context.MenuCategories.AddAsync(menuCategory);
         }
 
-        public async Task<MenuCategory> GetByIdAsync(int id)
+        public async Task<Menu> GetMenuByRestaurantIdAsync(int restaurantId)
         {
-            return await _context.MenuCategories.FindAsync(id);
+            return await _context.Menus
+                .Include(m => m.MenuCategories)
+                .FirstOrDefaultAsync(m => m.RestaurantId == restaurantId);
         }
 
         public async Task SaveChangesAsync()
