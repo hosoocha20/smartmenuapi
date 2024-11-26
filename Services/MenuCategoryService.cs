@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SmartMenuManagerApp.Dto;
 using SmartMenuManagerApp.Interfaces;
 using SmartMenuManagerApp.Models;
+using SmartMenuManagerApp.Repository;
 using System.Security.Claims;
 
 namespace SmartMenuManagerApp.Services
@@ -10,13 +11,16 @@ namespace SmartMenuManagerApp.Services
     public class MenuCategoryService : IMenuCategoryService
     {
         private readonly IMenuCategoryRepository _menuCategoryRepository;
+        private readonly IMenuRepository _menuRepository;
         private readonly IRestaurantRepository _restaurantRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
         public MenuCategoryService(IMenuCategoryRepository menuCategoryRepository,
+                                    IMenuRepository menuRepository,
                                     IRestaurantRepository restaurantRepository,
                                     IHttpContextAccessor httpContextAccessor)
         {
             _menuCategoryRepository = menuCategoryRepository;
+            _menuRepository = menuRepository;
             _restaurantRepository = restaurantRepository;
             _httpContextAccessor = httpContextAccessor;
         }
@@ -78,6 +82,51 @@ namespace SmartMenuManagerApp.Services
 
             // Fetch the categories
             return await _menuCategoryRepository.GetMenuCategoriesByMenuIdAsync(restaurant.Menu.Id);
+        }
+
+        public async Task<UserMenuDto> GetUserMenuAsync(string userId)
+        {
+            var restaurant = await _restaurantRepository.GetByUserIdAsync(userId);
+
+            if (restaurant == null)
+                throw new UnauthorizedAccessException("You do not have access to this restaurant.");
+
+            var menu = await _menuRepository.GetMenuWithDetailsAsync(restaurant.Id);
+
+            if (menu == null)
+                return null;
+
+            return new UserMenuDto
+            {
+                Id = menu.Id,
+                Name = menu.Name,
+                Categories = menu.MenuCategories.Select(c => new MenuCategoryDto
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    SubCategories = c.MenuSubCategories.Select(sc => new MenuSubCategoryDto
+                    {
+                        Id = sc.Id,
+                        Name = sc.Name,
+                        Products = sc.Products.Select(p => new ProductDto
+                        {
+                            Id = p.Id,
+                            Name = p.Name,
+                            Description = p.Description,
+                            Price = p.Price,
+                            ImgUrl = p.ImgUrl
+                        }).ToList()
+                    }).ToList(),
+                    Products = c.Products.Select(p => new ProductDto
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        Description = p.Description,
+                        Price = p.Price,
+                        ImgUrl = p.ImgUrl
+                    }).ToList()
+                }).ToList()
+            };
         }
     }
 }

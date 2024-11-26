@@ -59,7 +59,7 @@ namespace SmartMenuManagerApp.Controllers
             }
         }
 
-        [HttpPost("categories/{userId}")]
+        [HttpGet("categories/{userId}")]
         [Authorize(Policy = "Jwt_Or_Identity")] // Ensures only authenticated users can create a menu category
         public async Task<IActionResult> GetMenuCategories(string userId)
         {
@@ -86,6 +86,36 @@ namespace SmartMenuManagerApp.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "An unexpected error occurred.", details = ex.Message });
+            }
+        }
+
+        [HttpGet("menu/{userId}")]
+        [Authorize(Policy = "Jwt_Or_Identity")] // Ensures only authenticated users can get menu
+        public async Task<IActionResult> GetUserMenu()
+        {
+            try
+            {
+                // Extract the user ID from the JWT token
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (string.IsNullOrEmpty(userId))
+                    return Unauthorized(new { message = "User is not authenticated." });
+
+                // Call the service to get the menu
+                var menu = await _menuCategoryService.GetUserMenuAsync(userId);
+
+                if (menu == null)
+                    return NotFound(new { message = "No menu found for this user." });
+
+                return Ok(menu);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred.", details = ex.Message });
             }
         }
     }

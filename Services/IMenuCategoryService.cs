@@ -7,5 +7,6 @@ namespace SmartMenuManagerApp.Services
     {
         Task<MenuCategory> CreateCategoryAsync(CreateMenuCategoryDto request, string userId);
         Task<IEnumerable<MenuCategory>> GetUserMenuCategoriesAsync(string userId);
+        Task<UserMenuDto> GetUserMenuAsync(string userId);
     }
 }
