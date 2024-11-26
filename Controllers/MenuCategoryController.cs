@@ -17,7 +17,7 @@ namespace SmartMenuManagerApp.Controllers
         public MenuCategoryController(MenuCategoryService menuCategoryService, IJwtService jwtService)
         {
             _menuCategoryService = menuCategoryService;
-            _jwtService = jwtService; 
+            _jwtService = jwtService;
         }
 
         [HttpPost("category/create")]
@@ -44,6 +44,36 @@ namespace SmartMenuManagerApp.Controllers
                 // Pass the user ID to the service to check authorization
                 var menuCategory = await _menuCategoryService.CreateCategoryAsync(request, userId);
                 return CreatedAtAction(nameof(CreateCategory), new { id = menuCategory.Id }, menuCategory);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An unexpected error occurred.", details = ex.Message });
+            }
+        }
+
+        [HttpPost("categories/{userId}")]
+        [Authorize(Policy = "Jwt_Or_Identity")] // Ensures only authenticated users can create a menu category
+        public async Task<IActionResult> GetMenuCategories(string userId)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            try
+            {
+                var menuCategories = await _menuCategoryService.GetUserMenuCategoriesAsync(userId);
+                if (menuCategories == null || !menuCategories.Any())
+                {
+                    return NotFound(new { message = "No categories found or access denied." });
+                }
+
+                return Ok(menuCategories);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -88,5 +118,7 @@ namespace SmartMenuManagerApp.Controllers
                     return StatusCode(500, new { message = "An unexpected error occurred.", details = ex.Message });
                 }
             }*/
+
+ 
 }
 

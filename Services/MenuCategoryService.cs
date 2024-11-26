@@ -25,7 +25,7 @@ namespace SmartMenuManagerApp.Services
         {
             // Get the logged-in user's ID from the JWT token (through HttpContext)
             //var userId = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
-            Console.WriteLine("Service " + userId);
+            //Console.WriteLine("Service " + userId);
             if (string.IsNullOrEmpty(userId))
             {
                 throw new UnauthorizedAccessException("User is not authenticated.");
@@ -62,5 +62,22 @@ namespace SmartMenuManagerApp.Services
             return menuCategory;
         }
 
+        public async Task<IEnumerable<MenuCategory>> GetUserMenuCategoriesAsync(string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new UnauthorizedAccessException("User is not authenticated.");
+            }
+
+            // Retrieve the restaurant that belongs to the current user (logged in user)
+            var restaurant = await _restaurantRepository.GetByUserIdAsync(userId);
+            if (restaurant == null)
+            {
+                throw new UnauthorizedAccessException("You do not have access to this restaurant.");
+            }
+
+            // Fetch the categories
+            return await _menuCategoryRepository.GetMenuCategoriesByMenuIdAsync(restaurant.Menu.Id);
+        }
     }
 }

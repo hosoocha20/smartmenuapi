@@ -6,5 +6,6 @@ namespace SmartMenuManagerApp.Services
     public interface IMenuCategoryService
     {
         Task<MenuCategory> CreateCategoryAsync(CreateMenuCategoryDto request, string userId);
+        Task<IEnumerable<MenuCategory>> GetUserMenuCategoriesAsync(string userId);
     }
 }
