@@ -11,10 +11,10 @@ namespace SmartMenuManagerApp.Controllers
     [ApiController]
     public class MenuCategoryController : ControllerBase
     {
-        private readonly MenuCategoryService _menuCategoryService;
+        private readonly IMenuCategoryService _menuCategoryService;
         private readonly IJwtService _jwtService; // Inject JwtService to validate token
 
-        public MenuCategoryController(MenuCategoryService menuCategoryService, IJwtService jwtService)
+        public MenuCategoryController(IMenuCategoryService menuCategoryService, IJwtService jwtService)
         {
             _menuCategoryService = menuCategoryService;
             _jwtService = jwtService;
@@ -89,7 +89,7 @@ namespace SmartMenuManagerApp.Controllers
             }
         }
 
-        [HttpGet("menu/{userId}")]
+        [HttpGet("menu")]
         [Authorize(Policy = "Jwt_Or_Identity")] // Ensures only authenticated users can get menu
         public async Task<IActionResult> GetUserMenu()
         {

@@ -13,16 +13,14 @@ namespace SmartMenuManagerApp.Services
         private readonly IMenuCategoryRepository _menuCategoryRepository;
         private readonly IMenuRepository _menuRepository;
         private readonly IRestaurantRepository _restaurantRepository;
-        private readonly IHttpContextAccessor _httpContextAccessor;
         public MenuCategoryService(IMenuCategoryRepository menuCategoryRepository,
                                     IMenuRepository menuRepository,
-                                    IRestaurantRepository restaurantRepository,
-                                    IHttpContextAccessor httpContextAccessor)
+                                    IRestaurantRepository restaurantRepository)
         {
             _menuCategoryRepository = menuCategoryRepository;
             _menuRepository = menuRepository;
             _restaurantRepository = restaurantRepository;
-            _httpContextAccessor = httpContextAccessor;
+  
         }
 
         public async Task<MenuCategory> CreateCategoryAsync(CreateMenuCategoryDto request, string userId)
