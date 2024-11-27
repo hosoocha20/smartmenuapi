@@ -59,6 +59,41 @@ namespace SmartMenuManagerApp.Controllers
             }
         }
 
+        [HttpPost("subcategory/create")]
+        [Authorize(Policy = "Jwt_Or_Identity")] // Ensures only authenticated users can create a menu category
+        public async Task<IActionResult> CreateSubCategory([FromBody] CreateMenuSubCategoryDto request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            try
+            {
+                // Extract the user ID from the JWT token
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                Console.WriteLine("Controller" + userId);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized(new { message = "Invalid or expired token." });
+                }
+
+                // Pass the user ID to the service to check authorization
+                var menuSubCategory = await _menuCategoryService.CreateSubCategoryAsync(request, userId);
+                return CreatedAtAction(nameof(CreateCategory), new { id = menuSubCategory.Id }, menuSubCategory);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An unexpected error occurred.", details = ex.Message });
+            }
+        }
+
         [HttpGet("categories/{userId}")]
         [Authorize(Policy = "Jwt_Or_Identity")] // Ensures only authenticated users can create a menu category
         public async Task<IActionResult> GetMenuCategories(string userId)

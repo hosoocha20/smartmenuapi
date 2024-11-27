@@ -69,45 +69,29 @@ namespace SmartMenuManagerApp.Services
         }
 
         //Creating Sub Menu Category Service
-        public async Task<MenuSubCategory> CreateSubCategoryAsync(CreateMenuCategoryDto request, string userId, int menuCategoryId)
+        public async Task<MenuSubCategory> CreateSubCategoryAsync(CreateMenuSubCategoryDto request, string userId)
         {
-            // Get the logged-in user's ID from the JWT token (through HttpContext)
-            //var userId = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
-            //Console.WriteLine("Service " + userId);
             if (string.IsNullOrEmpty(userId))
             {
                 throw new UnauthorizedAccessException("User is not authenticated.");
             }
 
-            // Retrieve the restaurant that belongs to the current user (logged in user)
-            var restaurant = await _restaurantRepository.GetByUserIdAsync(userId);
-            if (restaurant == null)
-            {
-                throw new UnauthorizedAccessException("You do not have access to this restaurant.");
-            }
+            // Check if the parent category exists
+            var category = await _menuSubCategoryRepository.GetMenuCategoryWithSubCategoriesAsync(request.MenuCategoryId);
 
+            if (category == null)
+                throw new InvalidOperationException("MenuCategory not found.");
 
-            // Ensure that the restaurant has a menu (it should, as created at registration)
-            /*            if (restaurant.Menu == null)
-                        {
-                            throw new InvalidOperationException("This restaurant does not have a menu. Please create a menu first.");
-                        }*/
-
-            // Create the MenuCategory object based on the request
-            var menuSubCategory = new MenuSubCategory
+            var subCategory = new MenuSubCategory
             {
                 Name = request.Name,
-                //MenuCategoryId = restaurant.Menu.Id, // This ensures the category is added to the correct menu
-                //add MenuCategory reference
+                MenuCategoryId = request.MenuCategoryId
             };
-
-
-
-            // Save the category to the repository
-            await _menuSubCategoryRepository.AddAsync(menuSubCategory);
+            await _menuSubCategoryRepository.AddAsync(subCategory);
             await _menuCategoryRepository.SaveChangesAsync();
 
-            return menuSubCategory;
+            return subCategory;
+
         }
 
         public async Task<IEnumerable<MenuCategory>> GetUserMenuCategoriesAsync(string userId)
