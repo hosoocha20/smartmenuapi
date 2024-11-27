@@ -11,18 +11,22 @@ namespace SmartMenuManagerApp.Services
     public class MenuCategoryService : IMenuCategoryService
     {
         private readonly IMenuCategoryRepository _menuCategoryRepository;
+        private readonly IMenuSubCategoryRepository _menuSubCategoryRepository;
         private readonly IMenuRepository _menuRepository;
         private readonly IRestaurantRepository _restaurantRepository;
         public MenuCategoryService(IMenuCategoryRepository menuCategoryRepository,
+                                    IMenuSubCategoryRepository menuSubCategoryRepository,
                                     IMenuRepository menuRepository,
                                     IRestaurantRepository restaurantRepository)
         {
             _menuCategoryRepository = menuCategoryRepository;
+            _menuSubCategoryRepository = menuSubCategoryRepository;
             _menuRepository = menuRepository;
             _restaurantRepository = restaurantRepository;
   
         }
 
+        //Creating Menu Category Service
         public async Task<MenuCategory> CreateCategoryAsync(CreateMenuCategoryDto request, string userId)
         {
             // Get the logged-in user's ID from the JWT token (through HttpContext)
@@ -62,6 +66,48 @@ namespace SmartMenuManagerApp.Services
             await _menuCategoryRepository.SaveChangesAsync();
 
             return menuCategory;
+        }
+
+        //Creating Sub Menu Category Service
+        public async Task<MenuSubCategory> CreateSubCategoryAsync(CreateMenuCategoryDto request, string userId, int menuCategoryId)
+        {
+            // Get the logged-in user's ID from the JWT token (through HttpContext)
+            //var userId = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            //Console.WriteLine("Service " + userId);
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new UnauthorizedAccessException("User is not authenticated.");
+            }
+
+            // Retrieve the restaurant that belongs to the current user (logged in user)
+            var restaurant = await _restaurantRepository.GetByUserIdAsync(userId);
+            if (restaurant == null)
+            {
+                throw new UnauthorizedAccessException("You do not have access to this restaurant.");
+            }
+
+
+            // Ensure that the restaurant has a menu (it should, as created at registration)
+            /*            if (restaurant.Menu == null)
+                        {
+                            throw new InvalidOperationException("This restaurant does not have a menu. Please create a menu first.");
+                        }*/
+
+            // Create the MenuCategory object based on the request
+            var menuSubCategory = new MenuSubCategory
+            {
+                Name = request.Name,
+                //MenuCategoryId = restaurant.Menu.Id, // This ensures the category is added to the correct menu
+                //add MenuCategory reference
+            };
+
+
+
+            // Save the category to the repository
+            await _menuSubCategoryRepository.AddAsync(menuSubCategory);
+            await _menuCategoryRepository.SaveChangesAsync();
+
+            return menuSubCategory;
         }
 
         public async Task<IEnumerable<MenuCategory>> GetUserMenuCategoriesAsync(string userId)
