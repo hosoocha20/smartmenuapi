@@ -16,13 +16,15 @@ namespace SmartMenuManagerApp.Authentication
     public class AuthService : IAuthService
     {
         private readonly UserManager<User> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IJwtService _jwtService;
         private readonly DataContext _context;
 
-        public AuthService(UserManager<User> userManager, IJwtService jwtService, DataContext context)
+        public AuthService(UserManager<User> userManager, IJwtService jwtService, RoleManager<IdentityRole> roleManager, DataContext context)
         {
             _userManager = userManager;
             _jwtService = jwtService;
+            _roleManager = roleManager;
             _context = context;
         }
 
@@ -63,41 +65,22 @@ namespace SmartMenuManagerApp.Authentication
 
             // Create user
             var result = await _userManager.CreateAsync(user, registerDto.Password);
-            await _context.SaveChangesAsync();
+
             if (!result.Succeeded)
             {
-                return new ApiResponse(false, string.Join(", ", result.Errors.Select(e => e.Description)));
+                throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description))); // Return errors for better debugging
             }
 
-            // Create a restaurant for the user
- /*           var restaurant = new Restaurant
+            // Check if the role exists, and create it if not
+            if (!await _roleManager.RoleExistsAsync(registerDto.Role))
             {
-                Name = registerDto.RestaurantName,
-                OpeningTime = registerDto.OpeningTime,
-                ClosingTime = registerDto.ClosingTime,
-                Address = registerDto.Address,
-                PosProvider = registerDto.PosProvider,
-                UserId = user.Id, // Associate restaurant with the user
-                Menu = new Menu  // Create and associate the default menu
-                    {
-                        Name = registerDto.RestaurantName + " Menu",
-                        // Optionally, set more properties for the menu here
-                    }
-            };
+                await _roleManager.CreateAsync(new IdentityRole(registerDto.Role));
+            }
 
-            // Save the restaurant to the database
-            _context.Restaurants.Add(restaurant);
-            await _context.SaveChangesAsync();  // Save user and restaurant to the database*/
+            // Assign the user to the role
+            await _userManager.AddToRoleAsync(user, registerDto.Role);
+            await _context.SaveChangesAsync();
 
-            // Create default menu for the restaurant
-/*            var menu = new Menu
-            {
-                Name = registerDto.RestaurantName + " Menu",
-                RestaurantId = restaurant.Id
-            };
-
-            _context.Menus.Add(menu);
-            await _context.SaveChangesAsync();*/
 
             // Generate JWT Token for the user
             var jwtToken = _jwtService.GenerateJwtToken(user);

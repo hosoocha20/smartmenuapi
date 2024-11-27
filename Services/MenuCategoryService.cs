@@ -75,6 +75,12 @@ namespace SmartMenuManagerApp.Services
             {
                 throw new UnauthorizedAccessException("User is not authenticated.");
             }
+            // Retrieve the restaurant that belongs to the current user (logged in user)
+            var restaurant = await _restaurantRepository.GetByUserIdAsync(userId);
+            if (restaurant == null)
+            {
+                throw new UnauthorizedAccessException("You do not have access to this restaurant.");
+            }
 
             // Check if the parent category exists
             var category = await _menuSubCategoryRepository.GetMenuCategoryWithSubCategoriesAsync(request.MenuCategoryId);

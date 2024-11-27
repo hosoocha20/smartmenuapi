@@ -54,5 +54,13 @@ namespace SmartMenuManagerApp.Controllers
                 return StatusCode(500, new { message = "An unexpected error occurred.", details = ex.Message });
             }
         }
+
+        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "Jwt_Or_Identity")]
+        [HttpGet("admin-data")]
+        public IActionResult GetAdminData()
+        {
+            return Ok(new { message = "This is admin-only data" });
+        }
     }
 }

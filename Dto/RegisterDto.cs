@@ -11,5 +11,6 @@
         public string PosProvider {  get; set; }
         public TimeSpan OpeningTime { get; set; } // Store opening time
         public TimeSpan ClosingTime { get; set; } // Store closing time
+        public string Role { get; set; } = "User";
     }
 }

@@ -2,6 +2,7 @@ using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SmartMenuManagerApp.Authentication;
@@ -83,6 +84,7 @@ builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 builder.Services.AddScoped<UserManager<User>>();  
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings")); // JWT Settings
+builder.Services.Configure<AdminSettings>(builder.Configuration.GetSection("AdminSettings")); //Admin Settings
 
 // Add DbContext and configure SQL Server with the connection string
 builder.Services.AddDbContext<DataContext>(options =>
@@ -136,6 +138,12 @@ builder.Services.AddAuthorization(options =>
         policy.RequireAuthenticatedUser();
 
     });
+    // New policy for admin-only endpoints
+    options.AddPolicy("AdminOnly", policy =>
+    {
+        policy.RequireRole("Admin"); // Require the "Admin" role
+        policy.RequireAuthenticatedUser(); // Ensure the user is authenticated
+    });
 });
 
 // Add Identity services
@@ -146,6 +154,13 @@ builder.Services.AddIdentity<User, IdentityRole>()
 
 
 var app = builder.Build();
+
+// Create Admin role and Admin user on startup
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await CreateAdminUserAsync(services);
+}
 
 // Middleware to log request details
 app.Use(async (context, next) =>
@@ -170,3 +185,38 @@ app.UseDeveloperExceptionPage(); // This will show detailed errors in developmen
 app.MapControllers();
 
 app.Run();
+
+
+//Admin
+async Task CreateAdminUserAsync(IServiceProvider services)
+{
+    var userManager = services.GetRequiredService<UserManager<User>>();
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    var adminSettings = services.GetRequiredService<IOptions<AdminSettings>>().Value;
+
+    // Create the admin role if it doesn't exist
+    var roleExist = await roleManager.RoleExistsAsync("Admin");
+    if (!roleExist)
+    {
+        await roleManager.CreateAsync(new IdentityRole("Admin"));
+    }
+
+    // Check if the admin user already exists
+    var adminUser = await userManager.FindByEmailAsync(adminSettings.Email);
+    if (adminUser == null)
+    {
+        // Create the admin user if they don't exist
+        var user = new User
+        {
+            UserName = adminSettings.Email,
+            Email = adminSettings.Email,
+            PhoneNumber = "0000000000" // Default placeholder number
+        };
+        var createUserResult = await userManager.CreateAsync(user, adminSettings.Password);  // Set a strong password for the admin user
+        if (createUserResult.Succeeded)
+        {
+            // Assign the Admin role to the new user
+            await userManager.AddToRoleAsync(user, "Admin");
+        }
+    }
+}

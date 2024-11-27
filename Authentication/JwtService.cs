@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SmartMenuManagerApp.Configurations;
 using SmartMenuManagerApp.Models;
@@ -11,20 +12,28 @@ namespace SmartMenuManagerApp.Authentication
     public class JwtService : IJwtService
     {
         private readonly JwtSettings _jwtSettings;
+        private readonly UserManager<User> _userManager;
 
-        public JwtService(IOptions<JwtSettings> jwtSettings)
+        public JwtService(IOptions<JwtSettings> jwtSettings, UserManager<User> userManager)
         {
             _jwtSettings = jwtSettings.Value; // Access JwtSettings from configuration
+            _userManager = userManager;
         }
 
         public string GenerateJwtToken(User user)
         {
-            var claims = new[]
+            var claims = new List<Claim>
             {
             new Claim(ClaimTypes.Name, user.UserName),
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            // Add other claims here
-        };
+            
+            };
+            // Add role claim
+            var roles = _userManager.GetRolesAsync(user).Result;
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
