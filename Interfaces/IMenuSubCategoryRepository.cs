@@ -6,5 +6,6 @@ namespace SmartMenuManagerApp.Interfaces
     {
         Task AddAsync(MenuSubCategory menuSubCategory);
         Task<MenuCategory> GetMenuCategoryWithSubCategoriesAsync(int menuCategoryId);
+        Task<MenuSubCategory> GetSubCategoryAsync(int subCategoryId);
     }
 }

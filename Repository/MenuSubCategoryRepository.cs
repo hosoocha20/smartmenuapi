@@ -24,5 +24,12 @@ namespace SmartMenuManagerApp.Repository
                 .Include(c => c.MenuSubCategories) 
                 .FirstOrDefaultAsync(c => c.Id == menuCategoryId);
         }
+
+        public async Task<MenuSubCategory> GetSubCategoryAsync(int subCategoryId)
+        {
+            return await _context.MenuSubCategories
+                .Include(sc => sc.Products)
+                .FirstOrDefaultAsync(sc => sc.Id == subCategoryId);
+        }
     }
 }

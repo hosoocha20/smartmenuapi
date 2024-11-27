@@ -7,6 +7,6 @@
         public decimal Price { get; set; }
         public string ImgUrl { get; set; }
         public int MenuCategoryId { get; set; }
-        public int? MenuSubCategoryId { get; set; } // Optional
+        public int? MenuSubCategoryId { get; set; } 
     }
 }

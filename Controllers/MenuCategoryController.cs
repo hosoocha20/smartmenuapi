@@ -78,7 +78,7 @@ namespace SmartMenuManagerApp.Controllers
 
                 // Pass the user ID to the service to check authorization
                 var menuSubCategory = await _menuCategoryService.CreateSubCategoryAsync(request, userId);
-                return CreatedAtAction(nameof(CreateCategory), new { id = menuSubCategory.Id }, menuSubCategory);
+                return CreatedAtAction(nameof(CreateSubCategory), new { id = menuSubCategory.Id }, menuSubCategory);
             }
             catch (UnauthorizedAccessException ex)
             {
