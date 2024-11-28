@@ -19,9 +19,13 @@ namespace SmartMenuManagerApp.Repository
             return await _context.Menus
                 .Include(m => m.MenuCategories)
                     .ThenInclude(c => c.MenuSubCategories)
-                        .ThenInclude(sc => sc.Products) // Include products in subcategories
+                        .ThenInclude(sc => sc.Products)
+                            .ThenInclude(p => p.ProductLabels) // Include ProductLabels to get related labels
+                                .ThenInclude(pl => pl.Label) // Then include the Label data
                 .Include(m => m.MenuCategories)
-                    .ThenInclude(c => c.Products) // Include products directly in the category
+                    .ThenInclude(c => c.Products)
+                        .ThenInclude(p => p.ProductLabels) // Include ProductLabels to get related labels
+                            .ThenInclude(pl => pl.Label) // Then include the Label data
                 .FirstOrDefaultAsync(m => m.RestaurantId == restaurantId);
         }
     }

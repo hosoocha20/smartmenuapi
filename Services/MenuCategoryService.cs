@@ -148,17 +148,28 @@ namespace SmartMenuManagerApp.Services
                             Name = p.Name,
                             Description = p.Description,
                             Price = p.Price,
-                            ImgUrl = p.ImgUrl
+                            ImgUrl = p.ImgUrl,
+                            Labels = p.ProductLabels.Select(pl => new LabelDto
+                            {
+                                Id = pl.Label.Id,
+                                Name = pl.Label.Name,
+                            }).ToList()
                         }).ToList()
                     }).ToList(),
-                    Products = c.Products.Select(p => new ProductDto
-                    {
-                        Id = p.Id,
-                        Name = p.Name,
-                        Description = p.Description,
-                        Price = p.Price,
-                        ImgUrl = p.ImgUrl
-                    }).ToList()
+                    Products = c.Products.Where(p => !c.MenuSubCategories.Any(sc => sc.Products.Contains(p))) // Exclude products that are already in a subcategory
+                                         .Select(p => new ProductDto
+                                         {
+                                             Id = p.Id,
+                                             Name = p.Name,
+                                             Description = p.Description,
+                                             Price = p.Price,
+                                             ImgUrl = p.ImgUrl,
+                                             Labels = p.ProductLabels.Select(pl => new LabelDto
+                                             {
+                                                 Id = pl.Label.Id,
+                                                 Name = pl.Label.Name,
+                                             }).ToList()
+                                         }).ToList()
                 }).ToList()
             };
         }
