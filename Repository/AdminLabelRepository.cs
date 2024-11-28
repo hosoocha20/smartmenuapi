@@ -18,6 +18,17 @@ namespace SmartMenuManagerApp.Repository
             await _context.Labels.AddAsync(label);
         }
 
+        public async Task DeleteAsync(Label label)
+        {
+            _context.Labels.Remove(label);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<Label> GetByIdAsync(int id)
+        {
+            return await _context.Labels.FindAsync(id);
+        }
+
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();

@@ -5,6 +5,6 @@ namespace SmartMenuManagerApp.Services
 {
     public interface IProductService
     {
-        Task<Product> AddProductAsync(CreateProductDto request);
+        Task<Product> AddProductAsync(CreateProductDto request, string userId);
     }
 }

@@ -23,5 +23,17 @@ namespace SmartMenuManagerApp.Services
             await _adminLabelRepository.SaveChangesAsync();
             return label;
         }
+
+        public async Task<bool> DeleteLabelAsync(int labelId)
+        {
+            var label = await _adminLabelRepository.GetByIdAsync(labelId);
+            if (label == null)
+            {
+                throw new KeyNotFoundException("Label not found.");
+            }
+
+            await _adminLabelRepository.DeleteAsync(label);
+            return true;
+        }
     }
 }

@@ -10,16 +10,30 @@ namespace SmartMenuManagerApp.Services
         private readonly IProductRepository _productRepository;
         private readonly IMenuCategoryRepository _menuCategoryRepository;
         private readonly IMenuSubCategoryRepository _menuSubCategoryRepository;
+        private readonly IRestaurantRepository _restaurantRepository;
 
-        public ProductService(IProductRepository productRepository, IMenuCategoryRepository menuCategoryRepository, IMenuSubCategoryRepository menuSubCategoryRepository)
+        public ProductService(IProductRepository productRepository, IMenuCategoryRepository menuCategoryRepository, IMenuSubCategoryRepository menuSubCategoryRepository, IRestaurantRepository restaurantRepository)
         {
             _productRepository = productRepository;
             _menuCategoryRepository = menuCategoryRepository;
             _menuSubCategoryRepository = menuSubCategoryRepository;
+            _restaurantRepository = restaurantRepository;
         }
 
-        public async Task<Product> AddProductAsync(CreateProductDto request)
+        public async Task<Product> AddProductAsync(CreateProductDto request, string userId)
         {
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new UnauthorizedAccessException("User is not authenticated.");
+            }
+
+            // Retrieve the restaurant that belongs to the current user (logged in user)
+            var restaurant = await _restaurantRepository.GetByUserIdAsync(userId);
+            if (restaurant == null)
+            {
+                throw new UnauthorizedAccessException("You do not have access to this restaurant.");
+            }
+
             // Retrieve the category and subcategory (if provided)
             var category = await _menuCategoryRepository.GetCategoryAsync(request.MenuCategoryId);
             if (category == null)

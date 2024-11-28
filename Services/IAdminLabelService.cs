@@ -6,5 +6,6 @@ namespace SmartMenuManagerApp.Services
     public interface IAdminLabelService
     {
         Task<Label> AddLabelAsync(CreateLabelDto labelDto);
+        Task<bool> DeleteLabelAsync(int labelId);
     }
 }
