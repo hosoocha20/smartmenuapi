@@ -70,9 +70,29 @@ namespace SmartMenuManagerApp.Services
                 MenuSubCategoryId = request.MenuSubCategoryId
             };
 
-            // Save the product
+            
             await _productRepository.AddAsync(product);
             await _productRepository.SaveChangesAsync();
+
+            if (request.LabelIds != null && request.LabelIds.Any())
+            {
+                var labels = await _productRepository.GetLabelsByIdsAsync(request.LabelIds);
+
+                if (!labels.Any())
+                {
+                    throw new Exception("Invalid label IDs provided.");
+                }
+
+                var productLabels = labels.Select(label => new ProductLabel
+                {
+                    ProductId = product.Id,
+                    LabelId = label.Id
+                });
+
+                await _productRepository.AddProductLabelsAsync(productLabels);
+            }
+
+            
 
             return product;
         }
