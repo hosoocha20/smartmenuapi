@@ -59,6 +59,42 @@ namespace SmartMenuManagerApp.Controllers
             }
         }
 
+        [HttpGet("category/getTable")]
+        [Authorize(Policy = "Jwt_Or_Identity")]
+        public async Task<IActionResult> GetUserTableCategories()
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+ 
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized(new { message = "Invalid or expired token." });
+                }
+
+                // Pass the user ID to the service to check authorization
+                var menuCategories = await _menuCategoryService.GetAllTableMenuCategoriesAsync(userId);
+                if (menuCategories == null || !menuCategories.Any())
+                {
+                    return NotFound(new { message = "No sub categories found or access denied." });
+                }
+
+                return Ok(menuCategories);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An unexpected error occurred.", details = ex.Message });
+            }
+        }
+
         [HttpPost("subcategory/create")]
         [Authorize(Policy = "Jwt_Or_Identity")] // Ensures only authenticated users can create a menu category
         public async Task<IActionResult> CreateSubCategory([FromBody] CreateMenuSubCategoryDto request)
@@ -94,21 +130,27 @@ namespace SmartMenuManagerApp.Controllers
             }
         }
 
-        [HttpGet("categories/{userId}")]
+        [HttpGet("allsubcategories")]
         [Authorize(Policy = "Jwt_Or_Identity")] // Ensures only authenticated users can create a menu category
-        public async Task<IActionResult> GetMenuCategories(string userId)
+        public async Task<IActionResult> GetAllMenuSubCategories()
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             try
             {
-                var menuCategories = await _menuCategoryService.GetUserMenuCategoriesAsync(userId);
-                if (menuCategories == null || !menuCategories.Any())
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                Console.WriteLine("Controller" + userId);
+                if (string.IsNullOrEmpty(userId))
                 {
-                    return NotFound(new { message = "No categories found or access denied." });
+                    return Unauthorized(new { message = "Invalid or expired token." });
+                }
+                var menuSubCategories = await _menuCategoryService.GetAllSubCategoryAsync(userId);
+                if (menuSubCategories == null || !menuSubCategories.Any())
+                {
+                    return NotFound(new { message = "No sub categories found or access denied." });
                 }
 
-                return Ok(menuCategories);
+                return Ok(menuSubCategories);
             }
             catch (UnauthorizedAccessException ex)
             {

@@ -32,6 +32,16 @@ namespace SmartMenuManagerApp.Repository
                 .Where(mc => mc.MenuId == menuId)
                 .ToListAsync();
         }
+        public async Task<List<MenuCategory>> GetMenuCategoriesWithSubAndProductsAsync(int menuId)
+        {
+            return await _context.Menus
+                .Where(m => m.Id == menuId)
+                .SelectMany(m => m.MenuCategories)
+                .Include(c => c.MenuSubCategories)
+                .ThenInclude(sc => sc.Products) // Include products directly in the category
+                .Include(c => c.Products)
+                .ToListAsync();
+        }
         public async Task<MenuCategory> GetCategoryAsync(int categoryId)
         {
             return await _context.MenuCategories

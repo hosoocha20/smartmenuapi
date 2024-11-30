@@ -9,5 +9,6 @@
         public int MenuCategoryId { get; set; }
         public int? MenuSubCategoryId { get; set; }
         public List<int> LabelIds { get; set; } = new List<int>(); //For optional Label
+        public List<CreateProductOptionDto> ProductOptions { get; set; } = new List<CreateProductOptionDto>();
     }
 }

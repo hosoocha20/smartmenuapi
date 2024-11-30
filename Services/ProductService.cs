@@ -70,7 +70,28 @@ namespace SmartMenuManagerApp.Services
                 MenuSubCategoryId = request.MenuSubCategoryId
             };
 
-            
+            // Add product options if provided
+            foreach (var optionDto in request.ProductOptions)
+            {
+                var productOption = new ProductOption
+                {
+                    Name = optionDto.Name,
+                };
+
+                // Add option details if provided
+                foreach (var detailDto in optionDto.OptionDetails)
+                {
+                    productOption.OptionDetails.Add(new OptionDetail
+                    {
+                        Name = detailDto.Name,
+                        AdditionalPrice = detailDto.AdditionalPrice
+                    });
+                }
+
+                product.ProductOptions.Add(productOption);
+            }
+
+
             await _productRepository.AddAsync(product);
             await _productRepository.SaveChangesAsync();
 

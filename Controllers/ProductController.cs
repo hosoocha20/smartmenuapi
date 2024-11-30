@@ -39,7 +39,8 @@ namespace SmartMenuManagerApp.Controllers
 
                 
                 var product = await _productService.AddProductAsync(request, userId);
-                return CreatedAtAction(nameof(CreateProduct), new { id = product.Id }, product);
+                return Ok("Product created successfully.");
+                //return CreatedAtAction(nameof(CreateProduct), new { id = product.Id }, product);
             }
             catch (UnauthorizedAccessException ex)
             {

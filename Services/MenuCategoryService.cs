@@ -67,6 +67,27 @@ namespace SmartMenuManagerApp.Services
 
             return menuCategory;
         }
+        //Get User Categories for Table
+        public async Task<List<UserTableMenuCategoryDto>> GetAllTableMenuCategoriesAsync(string userId)
+        {
+            var restaurant = await _restaurantRepository.GetByUserIdAsync(userId);
+
+            if (restaurant == null)
+                throw new UnauthorizedAccessException("You do not have access to this restaurant.");
+
+            var menuCategories = await _menuCategoryRepository.GetMenuCategoriesWithSubAndProductsAsync(restaurant.Menu.Id);
+
+            if (menuCategories == null)
+                return null;
+
+            return menuCategories.Select(c => new UserTableMenuCategoryDto
+            {
+                Id = c.Id,
+                Name = c.Name,
+                SubCategoriesNo = c.MenuSubCategories.Count(), // Count of subcategories
+                ProductsNo = c.Products.Count() + c.MenuSubCategories.SelectMany(sc => sc.Products).Count() // Count of products in category and subcategories
+            }).ToList();
+        }
 
         //Creating Sub Menu Category Service
         public async Task<MenuSubCategory> CreateSubCategoryAsync(CreateMenuSubCategoryDto request, string userId)
@@ -98,6 +119,57 @@ namespace SmartMenuManagerApp.Services
 
             return subCategory;
 
+        }
+        //Get All Subcategories
+        public async Task<List<UserMenuSubCategoryDto>> GetAllSubCategoryAsync(string userId)
+        {
+            var restaurant = await _restaurantRepository.GetByUserIdAsync(userId);
+
+            if (restaurant == null)
+                throw new UnauthorizedAccessException("You do not have access to this restaurant.");
+
+            var menu = await _menuRepository.GetMenuWithDetailsAsync(restaurant.Id);
+
+            if (menu == null)
+                return null;
+            var subcategories = menu.MenuCategories
+                .SelectMany(c => c.MenuSubCategories) // Flatten all subcategories from all categories
+                .Select(sc => new UserMenuSubCategoryDto
+                {
+                    Id = sc.Id,
+                    Name = sc.Name,
+                    ParentCategory = new ParentCategoryDto // Mapping the parent category
+                    {
+                        Id = sc.MenuCategory.Id,
+                        Name = sc.MenuCategory.Name
+                    },
+                    Products = sc.Products.Select(p => new ProductDto
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        Description = p.Description,
+                        Price = p.Price,
+                        ImgUrl = p.ImgUrl,
+                        Labels = p.ProductLabels.Select(pl => new LabelDto
+                        {
+                            Id = pl.Label.Id,
+                            Name = pl.Label.Name
+                        }).ToList(),
+                        Options = p.ProductOptions.Select(po => new ProductOptionDto
+                         {
+                             Id = po.Id,
+                             Name = po.Name,
+                             OptionDetails = po.OptionDetails.Select(od => new OptionDetailDto
+                             {
+                                  Id = od.Id,
+                                  Name = od.Name,
+                                  AdditionalPrice = od.AdditionalPrice
+                              }).ToList()
+                         }).ToList()
+                    }).ToList()
+                })
+                .ToList();
+            return subcategories;
         }
 
         public async Task<IEnumerable<MenuCategory>> GetUserMenuCategoriesAsync(string userId)
@@ -153,6 +225,17 @@ namespace SmartMenuManagerApp.Services
                             {
                                 Id = pl.Label.Id,
                                 Name = pl.Label.Name,
+                            }).ToList(),
+                            Options = p.ProductOptions.Select(po => new ProductOptionDto
+                            {
+                                Id = po.Id,
+                                Name = po.Name,
+                                OptionDetails = po.OptionDetails.Select(od => new OptionDetailDto
+                                {
+                                    Id = od.Id,
+                                    Name = od.Name,
+                                    AdditionalPrice = od.AdditionalPrice
+                                }).ToList()
                             }).ToList()
                         }).ToList()
                     }).ToList(),
@@ -168,6 +251,17 @@ namespace SmartMenuManagerApp.Services
                                              {
                                                  Id = pl.Label.Id,
                                                  Name = pl.Label.Name,
+                                             }).ToList(),
+                                             Options = p.ProductOptions.Select(po => new ProductOptionDto
+                                             {
+                                                 Id = po.Id,
+                                                 Name = po.Name,
+                                                 OptionDetails = po.OptionDetails.Select(od => new OptionDetailDto
+                                                 {
+                                                     Id = od.Id,
+                                                     Name = od.Name,
+                                                     AdditionalPrice = od.AdditionalPrice
+                                                 }).ToList()
                                              }).ToList()
                                          }).ToList()
                 }).ToList()
