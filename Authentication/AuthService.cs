@@ -59,7 +59,27 @@ namespace SmartMenuManagerApp.Authentication
                     Menu = new Menu  // Create and associate the default menu
                     {
                         Name = registerDto.RestaurantName + " Menu"
-                    }
+                    },
+                    Theme = new Theme  // Create and associate a default theme
+                    {
+                        HeaderColor = "#FFFFFF",
+                        HeaderTextColor = "#000000",
+                        SubHeaderImgUrl = null,  // No default image
+                        SidebarColor = "#F4F4F4",
+                        SidebarTextColor = "#333333",
+                        SidebarSelectedColor = "#FF5733",
+                        BodyColor = "#FAFAFA",
+                        BodyHeaderTextColor = "#111111",
+                        MenuItemBodyColor = "#FFFFFF",
+                        MenuItemTextColor = "#444444",
+                        MenuItemPriceColor = "#FF0000",
+                        ButtonColor = "#007BFF",
+                        ButtonTextColor = "#FFFFFF",
+                        SubCategoryTextColor = "#222222",
+                        LogoUrl = "default-logo.png" // Placeholder logo
+                    },
+
+                    MyTables = new List<MyTable>() // Initialize an empty list of tables
                 }
             };
 

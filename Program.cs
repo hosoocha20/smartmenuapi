@@ -73,6 +73,7 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IMenuCategoryService, MenuCategoryService>();
 builder.Services.AddScoped<IAdminLabelService, AdminLabelService>();
+builder.Services.AddScoped<IRestaurantService, RestaurantService>();
 builder.Services.AddScoped<IMenuCategoryRepository, MenuCategoryRepository>();
 builder.Services.AddScoped<IMenuCategoryService, MenuCategoryService>();
 builder.Services.AddScoped<IMenuRepository, MenuRepository>();

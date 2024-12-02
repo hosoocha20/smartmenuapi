@@ -26,12 +26,12 @@ namespace SmartMenuManagerApp.Repository
                 .FirstOrDefaultAsync(m => m.RestaurantId == restaurantId);
         }
 
-        public async Task<IEnumerable<MenuCategory>> GetMenuCategoriesByMenuIdAsync(int menuId)
+/*        public async Task<IEnumerable<MenuCategory>> GetMenuCategoriesByMenuIdAsync(int menuId)
         {
             return await _context.MenuCategories
                 .Where(mc => mc.MenuId == menuId)
                 .ToListAsync();
-        }
+        }*/
         public async Task<List<MenuCategory>> GetMenuCategoriesWithSubAndProductsAsync(int menuId)
         {
             return await _context.Menus

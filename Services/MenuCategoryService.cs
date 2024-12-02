@@ -172,7 +172,7 @@ namespace SmartMenuManagerApp.Services
             return subcategories;
         }
 
-        public async Task<IEnumerable<MenuCategory>> GetUserMenuCategoriesAsync(string userId)
+/*        public async Task<IEnumerable<MenuCategory>> GetUserMenuCategoriesAsync(string userId)
         {
             if (string.IsNullOrEmpty(userId))
             {
@@ -188,7 +188,7 @@ namespace SmartMenuManagerApp.Services
 
             // Fetch the categories
             return await _menuCategoryRepository.GetMenuCategoriesByMenuIdAsync(restaurant.Menu.Id);
-        }
+        }*/
 
         public async Task<UserMenuDto> GetUserMenuAsync(string userId)
         {

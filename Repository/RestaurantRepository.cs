@@ -28,5 +28,37 @@ namespace SmartMenuManagerApp.Repository
                 .Include(r => r.Menu) // Include menu to check
                 .FirstOrDefaultAsync(r => r.Id == id);
         }
+
+        //Get Restaurant Details
+        public async Task<Restaurant> GetRestaurantWithDetailsAsync(int restaurantId)
+        {
+            return await _context.Restaurants
+        .Include(r => r.MyTables)
+        .Include(r => r.Menu)
+            .ThenInclude(m => m.MenuCategories)
+            .ThenInclude(c => c.MenuSubCategories)
+                .ThenInclude(sc => sc.Products)
+                    .ThenInclude(p => p.ProductLabels)
+                        .ThenInclude(pl => pl.Label)
+        .Include(r => r.Menu)
+        .ThenInclude(m => m.MenuCategories)
+            .ThenInclude(c => c.Products)
+                .ThenInclude(p => p.ProductLabels)
+                    .ThenInclude(pl => pl.Label)
+        .Include(r => r.Menu)
+        .ThenInclude(m => m.MenuCategories)
+            .ThenInclude(c => c.MenuSubCategories)
+                .ThenInclude(sc => sc.Products)
+                    .ThenInclude(p => p.ProductOptions) // Include ProductOptions
+                        .ThenInclude(po => po.OptionDetails) // Include OptionDetails for each option
+        .Include(r => r.Menu)
+        .ThenInclude(m => m.MenuCategories)
+            .ThenInclude(c => c.Products)
+                .ThenInclude(p => p.ProductOptions)
+                    .ThenInclude(po => po.OptionDetails)
+
+        .Include(r => r.Theme)
+        .FirstOrDefaultAsync(r => r.Id == restaurantId);
+        }
     }
 }

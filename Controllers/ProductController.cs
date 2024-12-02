@@ -38,8 +38,34 @@ namespace SmartMenuManagerApp.Controllers
                 }
 
                 
-                var product = await _productService.AddProductAsync(request, userId);
-                return Ok("Product created successfully.");
+                var createdProduct = await _productService.AddProductAsync(request, userId);
+                var productResponse = new ProductDto
+                {
+                    Id = createdProduct.Id,
+                    Name = createdProduct.Name,
+                    Description = createdProduct.Description,
+                    Price = createdProduct.Price,
+                    ImgUrl = createdProduct.ImgUrl,
+                    Options = createdProduct.ProductOptions.Select(po => new ProductOptionDto
+                    {
+                        Id = po.Id,
+                        Name = po.Name,
+                        OptionDetails = po.OptionDetails.Select(d => new OptionDetailDto
+                        {
+                            Id = d.Id,
+                            Name = d.Name,
+                            AdditionalPrice = d.AdditionalPrice
+                        }).ToList()
+                    }).ToList(),
+                    Labels = createdProduct.ProductLabels.Select(pl => new LabelDto
+                    {
+                        Id = pl.Label.Id,
+                        Name = pl.Label.Name
+                    }).ToList()
+                };
+
+                return CreatedAtAction(nameof(CreateProduct), new { id = createdProduct.Id }, productResponse);
+                //return Ok("Product created successfully.");
                 //return CreatedAtAction(nameof(CreateProduct), new { id = product.Id }, product);
             }
             catch (UnauthorizedAccessException ex)

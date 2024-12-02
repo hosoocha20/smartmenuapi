@@ -9,5 +9,8 @@ namespace SmartMenuManagerApp.Interfaces
 
         //Method to fetch restaurants by ID
         Task<Restaurant> GetByIdAsync(int id);
+
+        //Get Restaurant Details
+        Task<Restaurant> GetRestaurantWithDetailsAsync(int restaurantId);
     }
 }
