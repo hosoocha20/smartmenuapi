@@ -50,7 +50,16 @@ namespace SmartMenuManagerApp.Repository
                 .FirstOrDefaultAsync(mc => mc.Id == categoryId);
         }
 
+        public async Task<MenuCategory> GetCategoryByIdForRestaurantAsync(int restaurantId, int categoryId)
+        {
+            return await _context.MenuCategories
+                .FirstOrDefaultAsync(c => c.Id == categoryId && c.Menu.RestaurantId == restaurantId);
+        }
 
+        public void Remove(MenuCategory category)
+        {
+            _context.MenuCategories.Remove(category);
+        }
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();

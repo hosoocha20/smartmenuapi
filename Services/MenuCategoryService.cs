@@ -66,7 +66,49 @@ namespace SmartMenuManagerApp.Services
             await _menuCategoryRepository.SaveChangesAsync();
 
             return menuCategory;
+
         }
+
+        //Delete Category
+        public async Task<DeleteResultDto> DeleteCategoryAsync(int categoryId, int restaurantId)
+        {
+            var category = await _menuCategoryRepository.GetCategoryByIdForRestaurantAsync(restaurantId, categoryId);
+
+            if (category == null)
+            {
+                return new DeleteResultDto
+                {
+                    Status = "error",
+                    Message = "Category not found or does not belong to the restaurant."
+                };
+            }
+
+            try
+            {
+                
+                _menuCategoryRepository.Remove(category);
+                await _menuCategoryRepository.SaveChangesAsync(); // Commit changes to database
+
+                // Return success result
+                return new DeleteResultDto
+                {
+                    Status = "success",
+                    Message = "Category deleted successfully",
+                    Data = new { Id = categoryId }
+                };
+            }
+            catch (Exception ex)
+            {
+                // Return error if something goes wrong
+                return new DeleteResultDto
+                {
+                    Status = "error",
+                    Message = "An error occurred while deleting the category",
+                    Error = ex.Message
+                };
+            }
+        }
+    
         //Get User Categories for Table
         public async Task<List<UserTableMenuCategoryDto>> GetAllTableMenuCategoriesAsync(string userId)
         {

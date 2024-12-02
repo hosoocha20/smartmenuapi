@@ -22,11 +22,19 @@ namespace SmartMenuManagerApp.Authentication
 
         public string GenerateJwtToken(User user)
         {
+            // Ensure the restaurantId is available
+            var restaurantId = user.Restaurant?.Id.ToString(); // Access the Restaurant ID from the navigation property
+
+            if (string.IsNullOrEmpty(restaurantId))
+            {
+                throw new InvalidOperationException("Restaurant ID is not associated with the user.");
+            }
             var claims = new List<Claim>
             {
             new Claim(ClaimTypes.Name, user.UserName),
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            
+            new Claim("restaurantId", restaurantId)
+
             };
             // Add role claim
             var roles = _userManager.GetRolesAsync(user).Result;

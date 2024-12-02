@@ -6,6 +6,7 @@ namespace SmartMenuManagerApp.Services
     public interface IMenuCategoryService
     {
         Task<MenuCategory> CreateCategoryAsync(CreateMenuCategoryDto request, string userId);
+        Task<DeleteResultDto> DeleteCategoryAsync(int categoryId, int restaurantId);
         Task<MenuSubCategory> CreateSubCategoryAsync(CreateMenuSubCategoryDto request, string userId);
         
 /*        Task<IEnumerable<MenuCategory>> GetUserMenuCategoriesAsync(string userId);*/

@@ -111,10 +111,19 @@ namespace SmartMenuManagerApp.Authentication
         // LoginAsync - Handles User Login
         public async Task<ApiResponse> LoginAsync(LoginDto loginDto)
         {
-            var user = await _userManager.FindByEmailAsync(loginDto.Email);
+            var user = await _userManager.Users
+            .Include(u => u.Restaurant) // Include the Restaurant to ensure it's loaded
+            .FirstOrDefaultAsync(u => u.Email == loginDto.Email);
+
             if (user == null || !await _userManager.CheckPasswordAsync(user, loginDto.Password))
             {
                 return new ApiResponse(false, "Invalid credentials");
+            }
+
+            // Check if Restaurant is associated with the User
+            if (user.Restaurant == null)
+            {
+                return new ApiResponse(false, "Restaurant ID is not associated with the user.");
             }
 
             // Generate JWT Token
