@@ -29,13 +29,7 @@ namespace SmartMenuManagerApp.Controllers
 
             try
             {
-                // Get the token from the Authorization header
-                var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-
-                // Validate the token and get the user's claims
-                var principal = _jwtService.ValidateToken(token);
-                var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier); // Get user ID from the token
-                Console.WriteLine("Controller" + userId);
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 if (string.IsNullOrEmpty(userId))
                 {
                     return Unauthorized(new { message = "Invalid or expired token." });
