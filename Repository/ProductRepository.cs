@@ -30,9 +30,39 @@ namespace SmartMenuManagerApp.Repository
             await _context.SaveChangesAsync();
         }
 
+        public async Task<Product> GetProductByIdForRestaurantAsync(int restaurantId, int productId)
+        {
+            return await _context.Products
+                .FirstOrDefaultAsync(p => p.Id == productId && p.MenuCategory.Menu.RestaurantId == restaurantId);
+        }
+
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
         }
+        public void Remove(Product product)
+        {
+            _context.Products.Remove(product);
+        }
+
+        public async Task RemoveProductsBySubCategoryIdAsync(int subCategoryId)
+        {
+            var products = await _context.Products
+                .Where(p => p.MenuSubCategoryId == subCategoryId)
+                .ToListAsync();
+
+            if (products.Any())
+            {
+                _context.Products.RemoveRange(products);
+            }
+        }
+
+        public void RemoveRange(IEnumerable<Product> products)
+        {
+            _context.Products.RemoveRange(products);
+            
+        }
+
+
     }
 }

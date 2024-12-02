@@ -82,6 +82,52 @@ namespace SmartMenuManagerApp.Controllers
             }
         }
 
+        [HttpDelete("{productId}")]
+        [Authorize(Policy = "Jwt_Or_Identity")]
+        public async Task<IActionResult> DeleteProduct(int productId)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized(new { message = "Invalid or expired token." });
+                }
+                var restaurantId = User.FindFirst("restaurantId")?.Value;
+
+                if (string.IsNullOrEmpty(restaurantId))
+                {
+                    return Unauthorized("Restaurant ID not found in the token.");
+                }
+
+                // Pass the user ID to the service to check authorization
+                var result = await _productService.DeleteProductAsync(productId, int.Parse(restaurantId));
+                // Check the result status and return the appropriate HTTP response
+                if (result.Status == "success")
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest(result);
+                }
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An unexpected error occurred.", details = ex.Message });
+            }
+        }
+
+
         [Authorize(Policy = "AdminOnly")]
         [Authorize(Policy = "Jwt_Or_Identity")]
         [HttpGet("admin-data")]

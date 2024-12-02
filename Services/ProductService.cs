@@ -117,5 +117,44 @@ namespace SmartMenuManagerApp.Services
 
             return product;
         }
+
+        public async Task<DeleteResultDto> DeleteProductAsync(int productId, int restaurantId)
+        {
+            var product = await _productRepository.GetProductByIdForRestaurantAsync(restaurantId, productId);
+
+            if (product == null)
+            {
+                return new DeleteResultDto
+                {
+                    Status = "error",
+                    Message = "Product not found or does not belong to the restaurant."
+                };
+            }
+
+            try
+            {
+
+                _productRepository.Remove(product);
+                await _menuCategoryRepository.SaveChangesAsync(); // Commit changes to database
+
+                // Return success result
+                return new DeleteResultDto
+                {
+                    Status = "success",
+                    Message = "Product deleted successfully",
+                    Data = new { Id = productId }
+                };
+            }
+            catch (Exception ex)
+            {
+                // Return error if something goes wrong
+                return new DeleteResultDto
+                {
+                    Status = "error",
+                    Message = "An error occurred while deleting the product",
+                    Error = ex.Message
+                };
+            }
+        }
     }
 }

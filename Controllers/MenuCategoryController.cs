@@ -171,6 +171,51 @@ namespace SmartMenuManagerApp.Controllers
             }
         }
 
+        [HttpDelete("subcategory/{subCategoryId}")]
+        [Authorize(Policy = "Jwt_Or_Identity")]
+        public async Task<IActionResult> DeleteSubCategory(int subCategoryId)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized(new { message = "Invalid or expired token." });
+                }
+                var restaurantId = User.FindFirst("restaurantId")?.Value;
+
+                if (string.IsNullOrEmpty(restaurantId))
+                {
+                    return Unauthorized("Restaurant ID not found in the token.");
+                }
+
+                // Pass the user ID to the service to check authorization
+                var result = await _menuCategoryService.DeleteSubCategoryAsync(subCategoryId, int.Parse(restaurantId));
+                // Check the result status and return the appropriate HTTP response
+                if (result.Status == "success")
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest(result);
+                }
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An unexpected error occurred.", details = ex.Message });
+            }
+        }
+
         [HttpGet("allsubcategories")]
         [Authorize(Policy = "Jwt_Or_Identity")] // Ensures only authenticated users can create a menu category
         public async Task<IActionResult> GetAllMenuSubCategories()

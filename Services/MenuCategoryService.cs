@@ -14,15 +14,18 @@ namespace SmartMenuManagerApp.Services
         private readonly IMenuSubCategoryRepository _menuSubCategoryRepository;
         private readonly IMenuRepository _menuRepository;
         private readonly IRestaurantRepository _restaurantRepository;
+        private readonly IProductRepository _productRepository;
         public MenuCategoryService(IMenuCategoryRepository menuCategoryRepository,
                                     IMenuSubCategoryRepository menuSubCategoryRepository,
                                     IMenuRepository menuRepository,
-                                    IRestaurantRepository restaurantRepository)
+                                    IRestaurantRepository restaurantRepository,
+                                    IProductRepository productRespository)
         {
             _menuCategoryRepository = menuCategoryRepository;
             _menuSubCategoryRepository = menuSubCategoryRepository;
             _menuRepository = menuRepository;
             _restaurantRepository = restaurantRepository;
+            _productRepository = productRespository;
   
         }
 
@@ -161,6 +164,60 @@ namespace SmartMenuManagerApp.Services
 
             return subCategory;
 
+        }
+
+        //Delete SubCategory
+        public async Task<DeleteResultDto> DeleteSubCategoryAsync(int subCategoryId, int restaurantId)
+        {
+            var subCategory = await _menuSubCategoryRepository.GetSubCategoryByIdForRestaurantAsync(restaurantId, subCategoryId);
+                
+
+            if (subCategory == null)
+            {
+                return new DeleteResultDto
+                {
+                    Status = "error",
+                    Message = "Sub category not found or does not belong to the restaurant."
+                };
+            }
+
+            try
+            {
+              
+                if (subCategory.Products != null && subCategory.Products.Any())
+                {
+                    Console.WriteLine("productsexist");
+                    foreach (var product in subCategory.Products)
+                    {
+                        product.MenuSubCategoryId = null;  // Disassociate from subcategory
+                    }
+
+                    _productRepository.RemoveRange(subCategory.Products);
+                    await _menuCategoryRepository.SaveChangesAsync();
+                }
+
+                _menuSubCategoryRepository.Remove(subCategory);
+                await _menuCategoryRepository.SaveChangesAsync(); // Commit changes to database
+
+                // Return success result
+                return new DeleteResultDto
+                {
+                    Status = "success",
+                    Message = "Sub category deleted successfully",
+                    Data = new { Id = subCategoryId }
+                };
+            }
+            catch (DbUpdateException dbEx)
+            {
+                var innerException = dbEx.InnerException != null ? dbEx.InnerException.Message : dbEx.Message;
+                // Return error if something goes wrong
+                return new DeleteResultDto
+                {
+                    Status = "error",
+                    Message = "An error occurred while deleting the sub category",
+                    Error = innerException
+                };
+            }
         }
         //Get All Subcategories
         public async Task<List<UserMenuSubCategoryDto>> GetAllSubCategoryAsync(string userId)
