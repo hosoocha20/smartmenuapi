@@ -13,6 +13,10 @@ namespace SmartMenuManagerApp.Repository
             _context = context;
         }
 
+        public  void Remove(MenuSubCategory menuSubCategory)
+        {
+             _context.MenuSubCategories.Remove(menuSubCategory);
+        }
         public async Task AddAsync(MenuSubCategory menuSubCategory)
         {
             await _context.MenuSubCategories.AddAsync(menuSubCategory);

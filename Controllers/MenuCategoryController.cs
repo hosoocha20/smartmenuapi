@@ -148,7 +148,6 @@ namespace SmartMenuManagerApp.Controllers
             {
                 // Extract the user ID from the JWT token
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                Console.WriteLine("Controller" + userId);
                 if (string.IsNullOrEmpty(userId))
                 {
                     return Unauthorized(new { message = "Invalid or expired token." });
@@ -181,7 +180,7 @@ namespace SmartMenuManagerApp.Controllers
             try
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                Console.WriteLine("Controller" + userId);
+
                 if (string.IsNullOrEmpty(userId))
                 {
                     return Unauthorized(new { message = "Invalid or expired token." });
@@ -238,35 +237,7 @@ namespace SmartMenuManagerApp.Controllers
             }
         }
     }
-    /*        private readonly MenuCategoryService _menuCategoryService;
 
-            public MenuCategoryController(MenuCategoryService menuCategoryService)
-            {
-                _menuCategoryService = menuCategoryService;
-            }
-
-            [HttpPost("category/create")]
-            //[Authorize] // Ensures only authenticated users can create a menu category
-            public async Task<IActionResult> CreateCategory([FromBody] CreateMenuCategoryDto request)
-            {
-                try
-                {
-                    var menuCategory = await _menuCategoryService.CreateCategoryAsync(request);
-                    return CreatedAtAction(nameof(CreateCategory), new { id = menuCategory.Id }, menuCategory);
-                }
-                catch (UnauthorizedAccessException ex)
-                {
-                    return Unauthorized(new { message = ex.Message });
-                }
-                catch (InvalidOperationException ex)
-                {
-                    return BadRequest(new { message = ex.Message });
-                }
-                catch (Exception ex)
-                {
-                    return StatusCode(500, new { message = "An unexpected error occurred.", details = ex.Message });
-                }
-            }*/
 
  
 }
