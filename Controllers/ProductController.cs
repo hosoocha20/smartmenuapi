@@ -39,13 +39,15 @@ namespace SmartMenuManagerApp.Controllers
 
                 
                 var createdProduct = await _productService.AddProductAsync(request, userId);
-                var productResponse = new ProductDto
+                var productResponse = new ProductResponseDto
                 {
                     Id = createdProduct.Id,
                     Name = createdProduct.Name,
                     Description = createdProduct.Description,
                     Price = createdProduct.Price,
                     ImgUrl = createdProduct.ImgUrl,
+                    MenuCategoryId = createdProduct.MenuCategoryId,
+                    MenuSubCategoryId = createdProduct.MenuSubCategoryId,
                     Options = createdProduct.ProductOptions.Select(po => new ProductOptionDto
                     {
                         Id = po.Id,

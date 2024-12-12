@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SmartMenuManagerApp.Authentication;
 using SmartMenuManagerApp.Dto;
 using SmartMenuManagerApp.Services;
+using System.Collections.Generic;
 using System.Security.Claims;
 
 namespace SmartMenuManagerApp.Controllers
@@ -41,60 +42,8 @@ namespace SmartMenuManagerApp.Controllers
                 {
                     Id = createdMenuCategory.Id,
                     Name = createdMenuCategory.Name,
-                    SubCategories = createdMenuCategory.MenuSubCategories.Select(sc => new MenuSubCategoryDto
-                    {
-                        Id = sc.Id,
-                        Name = sc.Name,
-                        Products = sc.Products.Select(p => new ProductDto
-                        {
-                            Id = p.Id,
-                            Name = p.Name,
-                            Description = p.Description,
-                            Price = p.Price,
-                            ImgUrl = p.ImgUrl,
-                            Labels = p.ProductLabels.Select(pl => new LabelDto
-                            {
-                                Id = pl.Label.Id,
-                                Name = pl.Label.Name,
-                            }).ToList(),
-                            Options = p.ProductOptions.Select(po => new ProductOptionDto
-                            {
-                                Id = po.Id,
-                                Name = po.Name,
-                                OptionDetails = po.OptionDetails.Select(od => new OptionDetailDto
-                                {
-                                    Id = od.Id,
-                                    Name = od.Name,
-                                    AdditionalPrice = od.AdditionalPrice
-                                }).ToList()
-                            }).ToList()
-                        }).ToList()
-                    }).ToList(),
-                    Products = createdMenuCategory.Products.Where(p => !createdMenuCategory.MenuSubCategories.Any(sc => sc.Products.Contains(p))) // Exclude products that are already in a subcategory
-                         .Select(p => new ProductDto
-                          {
-                            Id = p.Id,
-                            Name = p.Name,
-                            Description = p.Description,
-                            Price = p.Price,
-                            ImgUrl = p.ImgUrl,
-                            Labels = p.ProductLabels.Select(pl => new LabelDto
-                            {
-                                Id = pl.Label.Id,
-                                Name = pl.Label.Name,
-                            }).ToList(),
-                            Options = p.ProductOptions.Select(po => new ProductOptionDto
-                            {
-                                Id = po.Id,
-                                Name = po.Name,
-                                OptionDetails = po.OptionDetails.Select(od => new OptionDetailDto
-                                {
-                                    Id = od.Id,
-                                    Name = od.Name,
-                                    AdditionalPrice = od.AdditionalPrice
-                                }).ToList()
-                            }).ToList()
-                        }).ToList()
+                    SubCategories = new List<MenuSubCategoryDto>(),
+                    Products = new List<ProductDto>()
 
                 };
                 return CreatedAtAction(nameof(CreateCategory), new { id = createdMenuCategory.Id }, menuCategoryResponse);
@@ -214,8 +163,16 @@ namespace SmartMenuManagerApp.Controllers
                 }
 
                 // Pass the user ID to the service to check authorization
-                var menuSubCategory = await _menuCategoryService.CreateSubCategoryAsync(request, userId);
-                return CreatedAtAction(nameof(CreateSubCategory), new { id = menuSubCategory.Id }, menuSubCategory);
+                var createdMenuSubCategory = await _menuCategoryService.CreateSubCategoryAsync(request, userId);
+                var menuSubCategoryResponse = new MenuSubCategoryResponseDto
+                {
+                    Id = createdMenuSubCategory.Id,
+                    Name = createdMenuSubCategory.Name,
+                    MenuCategoryId = createdMenuSubCategory.MenuCategoryId,
+                    Products = new List<ProductDto>()
+
+                };
+                return CreatedAtAction(nameof(CreateSubCategory), new { id = createdMenuSubCategory.Id }, menuSubCategoryResponse);
             }
             catch (UnauthorizedAccessException ex)
             {
