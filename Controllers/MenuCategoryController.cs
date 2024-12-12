@@ -36,8 +36,68 @@ namespace SmartMenuManagerApp.Controllers
                 }
 
                 // Pass the user ID to the service to check authorization
-                var menuCategory = await _menuCategoryService.CreateCategoryAsync(request, userId);
-                return CreatedAtAction(nameof(CreateCategory), new { id = menuCategory.Id }, menuCategory);
+                var createdMenuCategory = await _menuCategoryService.CreateCategoryAsync(request, userId);
+                var menuCategoryResponse = new MenuCategoryDto
+                {
+                    Id = createdMenuCategory.Id,
+                    Name = createdMenuCategory.Name,
+                    SubCategories = createdMenuCategory.MenuSubCategories.Select(sc => new MenuSubCategoryDto
+                    {
+                        Id = sc.Id,
+                        Name = sc.Name,
+                        Products = sc.Products.Select(p => new ProductDto
+                        {
+                            Id = p.Id,
+                            Name = p.Name,
+                            Description = p.Description,
+                            Price = p.Price,
+                            ImgUrl = p.ImgUrl,
+                            Labels = p.ProductLabels.Select(pl => new LabelDto
+                            {
+                                Id = pl.Label.Id,
+                                Name = pl.Label.Name,
+                            }).ToList(),
+                            Options = p.ProductOptions.Select(po => new ProductOptionDto
+                            {
+                                Id = po.Id,
+                                Name = po.Name,
+                                OptionDetails = po.OptionDetails.Select(od => new OptionDetailDto
+                                {
+                                    Id = od.Id,
+                                    Name = od.Name,
+                                    AdditionalPrice = od.AdditionalPrice
+                                }).ToList()
+                            }).ToList()
+                        }).ToList()
+                    }).ToList(),
+                    Products = createdMenuCategory.Products.Where(p => !createdMenuCategory.MenuSubCategories.Any(sc => sc.Products.Contains(p))) // Exclude products that are already in a subcategory
+                         .Select(p => new ProductDto
+                          {
+                            Id = p.Id,
+                            Name = p.Name,
+                            Description = p.Description,
+                            Price = p.Price,
+                            ImgUrl = p.ImgUrl,
+                            Labels = p.ProductLabels.Select(pl => new LabelDto
+                            {
+                                Id = pl.Label.Id,
+                                Name = pl.Label.Name,
+                            }).ToList(),
+                            Options = p.ProductOptions.Select(po => new ProductOptionDto
+                            {
+                                Id = po.Id,
+                                Name = po.Name,
+                                OptionDetails = po.OptionDetails.Select(od => new OptionDetailDto
+                                {
+                                    Id = od.Id,
+                                    Name = od.Name,
+                                    AdditionalPrice = od.AdditionalPrice
+                                }).ToList()
+                            }).ToList()
+                        }).ToList()
+
+                };
+                return CreatedAtAction(nameof(CreateCategory), new { id = createdMenuCategory.Id }, menuCategoryResponse);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -81,7 +141,7 @@ namespace SmartMenuManagerApp.Controllers
                 }
                 else
                 {
-                    return BadRequest(result); 
+                    return BadRequest(result);
                 }
             }
             catch (UnauthorizedAccessException ex)
@@ -96,7 +156,7 @@ namespace SmartMenuManagerApp.Controllers
             {
                 return StatusCode(500, new { message = "An unexpected error occurred.", details = ex.Message });
             }
-  
+
 
 
         }
@@ -108,7 +168,7 @@ namespace SmartMenuManagerApp.Controllers
             try
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
- 
+
                 if (string.IsNullOrEmpty(userId))
                 {
                     return Unauthorized(new { message = "Invalid or expired token." });
@@ -284,6 +344,6 @@ namespace SmartMenuManagerApp.Controllers
     }
 
 
- 
+
 }
 
